@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import os
+import shutil
+from pathlib import Path
+import random
+from clize import run
+
+def split(dataset_folder, *, train_ratio=0.9, target_folder="output", seed=42):
+    random.seed(seed)
+    path = Path(dataset_folder)
+    text_files = [*path.glob('**/*.txt')]
+    image_files = [
+        *path.glob('**/*.png'), *path.glob('**/*.jpg'),
+        *path.glob('**/*.jpeg'), *path.glob('**/*.bmp')
+    ]
+    text_files = {text_file.stem: text_file for text_file in text_files}
+    image_files = {image_file.stem: image_file for image_file in image_files}
+    keys = (image_files.keys() & text_files.keys())
+    keys = sorted(list(keys))
+    random.shuffle(keys)
+    text_files = {k: v for k, v in text_files.items() if k in keys}
+    image_files = {k: v for k, v in image_files.items() if k in keys}
+
+    nb_train = int(len(keys) * train_ratio)
+    train = keys[:nb_train]
+    test = keys[nb_train:]
+    print("save train")
+    print(len(train))
+    _save(image_files, text_files, train, os.path.join(target_folder, "train"))
+    print("save test")
+    print(len(test))
+    _save(image_files, text_files, test, os.path.join(target_folder, "test"))
+
+def _save(ims, texts, keys, folder):
+    os.makedirs(folder, exist_ok=True)
+    for k in keys:
+        shutil.copy(ims[k], folder)
+        shutil.copy(texts[k], folder)
+
+if __name__ == "__main__":
+    run([split])
