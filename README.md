@@ -1,4 +1,4 @@
-# DALLE_clip_score
+# DALLE_utils
 
 Utility functions that can be used for <https://github.com/lucidrains/DALLE-pytorch>  experiments.
 
